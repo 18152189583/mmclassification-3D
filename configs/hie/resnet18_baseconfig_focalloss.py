@@ -8,7 +8,6 @@ train_pipeline = [
     dict(type='NormalizeMedical', norm_type='full_volume_mean',
          instensity_min_val=0.5,
          instensity_max_val=99.5),
-    # dict(type='ResizeMedical', size=(80, 160, 160)),
     dict(type='ResizeMedical', size=(160, 160, 80)),
     # dict(type='Normalize', **img_norm_cfg),
     dict(type='ConcatImage'),
@@ -53,11 +52,9 @@ data = dict(
         pipeline=test_pipeline,
         modes=['t1_zw']))
 evaluation = dict(interval=2, metric=['accuracy', 'precision', 'recall', 'f1_score', 'support'])
-
-
 norm_cfg = dict(type='BN3d', requires_grad=True)
 conv_cfg = dict(type='Conv3d')
-num_classes = 2
+num_classes = 1
 # model settings
 model = dict(
     type='ImageClassifier',
@@ -84,7 +81,7 @@ model = dict(
         type='LinearClsHead',
         num_classes=num_classes,
         in_channels=512,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+        loss=dict(type='FocalLoss', loss_weight=1.0),
         topk=(1,),
     ))
 

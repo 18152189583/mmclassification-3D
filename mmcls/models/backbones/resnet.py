@@ -322,6 +322,7 @@ class ResLayer(nn.Sequential):
                  out_channels,
                  expansion=None,
                  stride=1,
+                 in_dims=2,
                  avg_down=False,
                  conv_cfg=None,
                  norm_cfg=dict(type='BN'),
@@ -335,12 +336,20 @@ class ResLayer(nn.Sequential):
             conv_stride = stride
             if avg_down and stride != 1:
                 conv_stride = 1
-                downsample.append(
-                    nn.AvgPool2d(
-                        kernel_size=stride,
-                        stride=stride,
-                        ceil_mode=True,
-                        count_include_pad=False))
+                if in_dims == 2:
+                    downsample.append(
+                        nn.AvgPool2d(
+                            kernel_size=stride,
+                            stride=stride,
+                            ceil_mode=True,
+                            count_include_pad=False))
+                elif in_dims == 3:
+                    downsample.append(
+                        nn.AvgPool3d(
+                            kernel_size=stride,
+                            stride=stride,
+                            ceil_mode=True,
+                            count_include_pad=False))
             downsample.extend([
                 build_conv_layer(
                     conv_cfg,
@@ -507,6 +516,7 @@ class ResNet(BaseBackbone):
                 block=self.block,
                 num_blocks=num_blocks,
                 in_channels=_in_channels,
+                in_dims=in_dims,
                 out_channels=_out_channels,
                 expansion=self.expansion,
                 stride=stride,

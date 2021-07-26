@@ -8,8 +8,7 @@ train_pipeline = [
     dict(type='NormalizeMedical', norm_type='full_volume_mean',
          instensity_min_val=0.5,
          instensity_max_val=99.5),
-    # dict(type='ResizeMedical', size=(80, 160, 160)),
-    dict(type='ResizeMedical', size=(160, 160, 80)),
+    dict(type='ResizeMedical', size=(80, 160, 160)),
     # dict(type='Normalize', **img_norm_cfg),
     dict(type='ConcatImage'),
     # dict(type='ImageToTensor', keys=['img']),
@@ -23,7 +22,7 @@ test_pipeline = [
     dict(type='NormalizeMedical', norm_type='full_volume_mean',
          instensity_min_val=0.5,
          instensity_max_val=99.5),
-    dict(type='ResizeMedical', size=(160, 160, 80)),
+    dict(type='ResizeMedical', size=(80, 160, 160)),
     dict(type='ToTensor', keys=['img']),
     dict(type='Collect', keys=['img'])
 ]
@@ -52,7 +51,7 @@ data = dict(
         ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_fse_val.txt',
         pipeline=test_pipeline,
         modes=['t1_zw']))
-evaluation = dict(interval=2, metric=['accuracy', 'precision', 'recall', 'f1_score', 'support'])
+evaluation = dict(interval=2, metric='accuracy')
 
 
 norm_cfg = dict(type='BN3d', requires_grad=True)
@@ -88,11 +87,24 @@ model = dict(
         topk=(1,),
     ))
 
-optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001)
-optimizer_config = dict(grad_clip=None)
+# optimizer
+optimizer = dict(type='AdamW', lr=0.003, weight_decay=0.3)
+optimizer_config = dict(grad_clip=dict(max_norm=1.0))
+
+# specific to vit pretrain
+# paramwise_cfg = dict(
+#     custom_keys={
+#         '.backbone.cls_token': dict(decay_mult=0.0),
+#         '.backbone.pos_embed': dict(decay_mult=0.0)
+#     })
 # learning policy
-lr_config = dict(policy='step', step=[40, 80, 120])
-runner = dict(type='EpochBasedRunner', max_epochs=160)
+lr_config = dict(
+    policy='CosineAnnealing',
+    min_lr=0,
+    warmup='linear',
+    warmup_iters=50,
+    warmup_ratio=1e-4)
+runner = dict(type='EpochBasedRunner', max_epochs=300)
 
 log_config = dict(
     interval=10,
@@ -101,7 +113,7 @@ log_config = dict(
         # dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
-checkpoint_config = dict(by_epoch=True, interval=2)
+checkpoint_config = None
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None

@@ -34,14 +34,14 @@ data = dict(
         type=dataset_type,
         data_prefix='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/'
                     'hie_resample_0.5x0.5x0.5_niigz',
-        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_fse_train.txt',
+        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_flair_train.txt',
         pipeline=train_pipeline,
         modes=['t1_zw']),
     val=dict(
         type=dataset_type,
         data_prefix='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/'
                     'hie_resample_0.5x0.5x0.5_niigz',
-        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_fse_val.txt',
+        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_flair_val.txt',
         pipeline=test_pipeline,
         modes=['t1_zw']),
     test=dict(
@@ -49,7 +49,7 @@ data = dict(
         type=dataset_type,
         data_prefix='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/'
                     'hie_resample_0.5x0.5x0.5_niigz',
-        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_fse_val.txt',
+        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_flair_val.txt',
         pipeline=test_pipeline,
         modes=['t1_zw']))
 evaluation = dict(interval=2, metric=['accuracy', 'precision', 'recall', 'f1_score', 'support'])

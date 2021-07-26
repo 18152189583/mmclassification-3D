@@ -38,8 +38,6 @@ class LoadImageFromNIIFile(object):
             dict: The dict contains loaded image and meta information.
         """
 
-        # filename = None
-        # img = None
         if isinstance(results["img_info"]['filename'], list) or \
             isinstance(results["img_info"]['filename'], tuple):
             filename = []

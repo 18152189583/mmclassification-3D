@@ -8,8 +8,7 @@ train_pipeline = [
     dict(type='NormalizeMedical', norm_type='full_volume_mean',
          instensity_min_val=0.5,
          instensity_max_val=99.5),
-    # dict(type='ResizeMedical', size=(80, 160, 160)),
-    dict(type='ResizeMedical', size=(160, 160, 80)),
+    dict(type='ResizeMedical', size=(160, 160, 40)),
     # dict(type='Normalize', **img_norm_cfg),
     dict(type='ConcatImage'),
     # dict(type='ImageToTensor', keys=['img']),
@@ -23,7 +22,7 @@ test_pipeline = [
     dict(type='NormalizeMedical', norm_type='full_volume_mean',
          instensity_min_val=0.5,
          instensity_max_val=99.5),
-    dict(type='ResizeMedical', size=(160, 160, 80)),
+    dict(type='ResizeMedical', size=(160, 160, 40)),
     dict(type='ToTensor', keys=['img']),
     dict(type='Collect', keys=['img'])
 ]
@@ -33,14 +32,14 @@ data = dict(
     train=dict(
         type=dataset_type,
         data_prefix='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/'
-                    'hie_resample_0.5x0.5x0.5_niigz',
+                    'hie_resample_1x1x1_niigz',
         ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_fse_train.txt',
         pipeline=train_pipeline,
         modes=['t1_zw']),
     val=dict(
         type=dataset_type,
         data_prefix='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/'
-                    'hie_resample_0.5x0.5x0.5_niigz',
+                    'hie_resample_1x1x1_niigz',
         ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_fse_val.txt',
         pipeline=test_pipeline,
         modes=['t1_zw']),
@@ -48,7 +47,7 @@ data = dict(
         # replace `data/val` with `data/test` for standard test
         type=dataset_type,
         data_prefix='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/'
-                    'hie_resample_0.5x0.5x0.5_niigz',
+                    'hie_resample_1x1x1_niigz',
         ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_fse_val.txt',
         pipeline=test_pipeline,
         modes=['t1_zw']))
@@ -62,7 +61,7 @@ num_classes = 2
 model = dict(
     type='ImageClassifier',
     backbone=dict(
-        type='ResNet',
+        type='ResNetV1d',
         depth=18,
         in_channels=1,
         in_dims=3,
@@ -84,15 +83,15 @@ model = dict(
         type='LinearClsHead',
         num_classes=num_classes,
         in_channels=512,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+        loss=dict(type='FocalLoss', loss_weight=1.0),
         topk=(1,),
     ))
 
 optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
 # learning policy
-lr_config = dict(policy='step', step=[40, 80, 120])
 runner = dict(type='EpochBasedRunner', max_epochs=160)
+
 
 log_config = dict(
     interval=10,

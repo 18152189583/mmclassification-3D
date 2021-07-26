@@ -8,7 +8,6 @@ train_pipeline = [
     dict(type='NormalizeMedical', norm_type='full_volume_mean',
          instensity_min_val=0.5,
          instensity_max_val=99.5),
-    # dict(type='ResizeMedical', size=(80, 160, 160)),
     dict(type='ResizeMedical', size=(160, 160, 80)),
     # dict(type='Normalize', **img_norm_cfg),
     dict(type='ConcatImage'),
@@ -34,14 +33,14 @@ data = dict(
         type=dataset_type,
         data_prefix='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/'
                     'hie_resample_0.5x0.5x0.5_niigz',
-        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_fse_train.txt',
+        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_flair_train.txt',
         pipeline=train_pipeline,
         modes=['t1_zw']),
     val=dict(
         type=dataset_type,
         data_prefix='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/'
                     'hie_resample_0.5x0.5x0.5_niigz',
-        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_fse_val.txt',
+        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_flair_val.txt',
         pipeline=test_pipeline,
         modes=['t1_zw']),
     test=dict(
@@ -49,12 +48,10 @@ data = dict(
         type=dataset_type,
         data_prefix='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/'
                     'hie_resample_0.5x0.5x0.5_niigz',
-        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_fse_val.txt',
+        ann_file='/opt/data/private/project/charelchen.cj/workDir/dataset/hie/t1_zw_flair_val.txt',
         pipeline=test_pipeline,
         modes=['t1_zw']))
 evaluation = dict(interval=2, metric=['accuracy', 'precision', 'recall', 'f1_score', 'support'])
-
-
 norm_cfg = dict(type='BN3d', requires_grad=True)
 conv_cfg = dict(type='Conv3d')
 num_classes = 2
@@ -62,7 +59,7 @@ num_classes = 2
 model = dict(
     type='ImageClassifier',
     backbone=dict(
-        type='ResNet',
+        type='ResNetV1d',
         depth=18,
         in_channels=1,
         in_dims=3,
@@ -84,7 +81,8 @@ model = dict(
         type='LinearClsHead',
         num_classes=num_classes,
         in_channels=512,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+        loss=dict(type='LabelSmoothLoss', loss_weight=1.0,
+                  num_classes=num_classes, label_smooth_val=0.2),
         topk=(1,),
     ))
 
@@ -93,7 +91,7 @@ optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(policy='step', step=[40, 80, 120])
 runner = dict(type='EpochBasedRunner', max_epochs=160)
-
+checkpoint_config = dict(by_epoch=True, interval=2)
 log_config = dict(
     interval=10,
     hooks=[
@@ -101,7 +99,7 @@ log_config = dict(
         # dict(type='TensorboardLoggerHook')
     ])
 # yapf:enable
-checkpoint_config = dict(by_epoch=True, interval=2)
+# checkpoint_config = None
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None

@@ -115,3 +115,5 @@ work_dirs/
 
 # Pytorch
 *.pth
+tools/work_dirs/
+scripts/

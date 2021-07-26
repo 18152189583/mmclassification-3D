@@ -8,7 +8,6 @@ train_pipeline = [
     dict(type='NormalizeMedical', norm_type='full_volume_mean',
          instensity_min_val=0.5,
          instensity_max_val=99.5),
-    # dict(type='ResizeMedical', size=(80, 160, 160)),
     dict(type='ResizeMedical', size=(160, 160, 80)),
     # dict(type='Normalize', **img_norm_cfg),
     dict(type='ConcatImage'),
@@ -62,7 +61,7 @@ num_classes = 2
 model = dict(
     type='ImageClassifier',
     backbone=dict(
-        type='ResNet',
+        type='ResNetV1d',
         depth=18,
         in_channels=1,
         in_dims=3,
@@ -84,15 +83,15 @@ model = dict(
         type='LinearClsHead',
         num_classes=num_classes,
         in_channels=512,
-        loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+        loss=dict(type='FocalLoss', loss_weight=1.0),
         topk=(1,),
     ))
 
 optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
 # learning policy
-lr_config = dict(policy='step', step=[40, 80, 120])
 runner = dict(type='EpochBasedRunner', max_epochs=160)
+
 
 log_config = dict(
     interval=10,
